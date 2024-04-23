@@ -7,15 +7,21 @@ return {
 	{
 		"stevearc/oil.nvim",
 		dependencies = { "nvim-tree/nvim-web-devicons" },
-		config = function()
-			require("oil").setup()
-		end,
+		opts = {},
 	},
+
 	{
 		"echasnovski/mini.statusline",
 		version = "*",
-		config = function()
-			require("mini.statusline").setup()
-		end,
+		opts = {},
+	},
+
+	{ "echasnovski/mini.ai", version = "*", opts = {} },
+	{ "numToStr/Comment.nvim", opts = {} },
+	{
+		"folke/todo-comments.nvim",
+		event = "VimEnter",
+		dependencies = { "nvim-lua/plenary.nvim" },
+		opts = { signs = false },
 	},
 }
