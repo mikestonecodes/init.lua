@@ -39,9 +39,6 @@ vim.keymap.set(
 	"oif err != nil {<CR>}<Esc>Oreturn err<Esc>"
 )
 
-vim.keymap.set("n", "yb", "yVaB")
-vim.keymap.set("n", "db", "dVaB")
-vim.keymap.set("n", "cb", "cVaB")
 
 -- vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.dotfiles/nvim/.config/nvim/lua/theprimeagen/packer.lua<CR>");
 
