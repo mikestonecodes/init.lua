@@ -23,6 +23,14 @@ return {
 	dependencies = {
 		{ "stevearc/overseer.nvim", opts = { dap = false } },
 		{
+			"mxsdev/nvim-dap-vscode-js",
+			{
+				"microsoft/vscode-js-debug",
+				version = "1.x",
+				build = "npm i && npm run compile vsDebugServerBundle && mv dist out",
+			},
+		},
+		{
 			"rcarriga/nvim-dap-ui",
 			dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
 			keys = {
@@ -64,39 +72,9 @@ return {
 				},
 			},
 		},
-		-- vscode-js-debug adapter
-		{
-			"microsoft/vscode-js-debug",
-			build = "npm install --legacy-peer-deps && npx gulp vsDebugServerBundle && mv dist out",
-		},
-		{
-			"mxsdev/nvim-dap-vscode-js",
-			opts = {
-				debugger_path = vim.fn.resolve(vim.fn.stdpath("data") .. "/lazy/vscode-js-debug"),
-				adapters = { "pwa-node" },
-			},
-		},
+
 		{ "theHamsta/nvim-dap-virtual-text", opts = {} },
 		-- Lua adapter
-		{
-			"jbyuki/one-small-step-for-vimkind",
-			keys = {
-				{
-					"<leader>dL",
-					function()
-						require("osv").launch({ port = 8086 })
-					end,
-					desc = desc("Launch Lua adapter"),
-				},
-				{
-					"<leader>dT",
-					function()
-						require("osv").run_this()
-					end,
-					desc = desc("Lua adapter: Run this"),
-				},
-			},
-		},
 	},
 	keys = {
 		{
@@ -220,6 +198,7 @@ return {
 					dap_vscode.load_launchjs(nil, {
 						["firefox"] = js_based_languages,
 						["pwa-node"] = js_based_languages,
+						["pwa-chrome"] = js_based_languages,
 					})
 				end
 				require("dap").continue({ before = get_args })
@@ -228,8 +207,6 @@ return {
 		},
 	},
 	config = function()
-		local dap = require("dap")
-		local dapui = require("dapui")
 		local icons = {
 			Stopped = { "󰁕 ", "DiagnosticSignWarn", "DapStoppedLine" },
 			Breakpoint = { " ", "DiagnosticSignInfo" },
@@ -237,16 +214,35 @@ return {
 			BreakpointRejected = { " ", "DiagnosticSignError" },
 			LogPoint = ".>",
 		}
-		dap.listeners.after.event_initialized["dapui_config"] = function()
-			dapui.open({})
-		end
-		dap.listeners.before.event_terminated["dapui_config"] = function()
-			dapui.close({})
-		end
-		dap.listeners.before.event_exited["dapui_config"] = function()
-			dapui.close({})
-		end
+		require("dap-vscode-js").setup({
+			debugger_path = vim.fn.stdpath("data") .. "/lazy/vscode-js-debug",
+			adapters = {  'pwa-chrome' },
+		})
 
+		require("dap").adapters.firefox = {
+			type = "executable",
+			command = "node",
+			port = 9222,
+			args = {
+				require("mason-registry").get_package("firefox-debug-adapter"):get_install_path()
+					.. "/dist/adapter.bundle.js",
+			},
+		}
+		require("dap").adapters["pwa-node"] = {
+			type = "server",
+			host = "localhost",
+			port = "${port}", --let both ports be the same for now...
+			executable = {
+				command = "node",
+				-- -- 💀 Make sure to update this path to point to your installation
+				args = {
+					vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js",
+					"${port}",
+				},
+				-- command = "js-debug-adapter",
+				-- args = { "${port}" },
+			},
+		}
 		vim.api.nvim_set_hl(0, "DapStoppedLine", { default = true, link = "Visual" })
 
 		for name, sign in pairs(icons) do
@@ -261,26 +257,5 @@ return {
 		require("overseer").patch_dap(true)
 
 		-- Lua configurations.
-		dap.adapters.nlua = function(callback, config)
-			callback({ type = "server", host = config.host or "127.0.0.1", port = config.port or 8086 })
-		end
-
-		require("dap").adapters.firefox = {
-			type = "executable",
-			command = "node",
-			port = 9222,
-			args = {
-				require("mason-registry").get_package("firefox-debug-adapter"):get_install_path()
-					.. "/dist/adapter.bundle.js",
-			},
-		}
-		dap.configurations["lua"] = {
-			{
-				type = "nlua",
-				request = "attach",
-				name = "Attach to running Neovim instance",
-				host = "127.0.0.1",
-			},
-		}
 	end,
 }
