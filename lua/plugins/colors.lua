@@ -1,51 +1,39 @@
-function ColorMyPencils(color)
-	color = color or "rose-pine"
-	vim.cmd.colorscheme(color)
-
-	vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-	vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-
-end
-
 return {
-    {
-        "folke/tokyonight.nvim",
-        config = function()
-            require("tokyonight").setup({
-                -- your configuration comes here
-                -- or leave it empty to use the default settings
-                style = "night", -- The theme comes in three styles, `storm`, `moon`, a darker variant `night` and `day`
-                transparent = true, -- Enable this to disable setting the background color
-                terminal_colors = true, -- Configure the colors used when opening a `:terminal` in Neovim
-                styles = {
-                    -- Style to be applied to different syntax groups
-                    -- Value is any valid attr-list value for `:help nvim_set_hl`
-                    comments = { italic = false },
-                    keywords = { italic = false },
-                    -- Background styles. Can be "dark", "transparent" or "normal"
-                    sidebars = "dark", -- style for sidebars, see below
-                    floats = "dark", -- style for floating windows
-                },
-            })
-        end
-    },
-
-    {
-        "rose-pine/neovim",
-        name = "rose-pine",
-        config = function()
-            require('rose-pine').setup({
-                disable_background = true,
-                styles = {
-                    italic = false,
-                },
-            })
-
-            vim.cmd("colorscheme rose-pine")
-
-            ColorMyPencils()
-        end
-    },
-
-
+	{
+		"navarasu/onedark.nvim",
+		config = function()
+			require("onedark").setup({
+				colors = {
+					black="#111416",
+					bg0 = "#111416",
+					bg1 = "#31353f",
+					bg2 = "#353b45",
+					bg3 = "#373b43",
+					bg_d = "#21252b",
+					bg_blue = "#81A1C1",
+					bg_yellow = "#EBCB8B",
+					fg = "#abb2bf",
+					purple = "#de98fd",
+					green = "#98c379",
+					orange = "#fca2aa",
+					blue = "#61afef",
+					yellow = "#e7c787",
+					cyan = "#a3b8ef",
+					red = "#e06c75",
+					grey = "#42464e",
+					light_grey = "#6f737b",
+					dark_cyan = "#519ABA",
+					dark_red = "#e06c75",
+					dark_yellow = "#e7c787",
+					dark_purple = "#c882e7",
+					diff_add = "#98c379",
+					diff_delete = "#e06c75",
+					diff_change = "#61afef",
+					diff_text = "#EBCB8B",
+				},
+				style = "darker",
+			})
+			require("onedark").load()
+		end,
+	},
 }
