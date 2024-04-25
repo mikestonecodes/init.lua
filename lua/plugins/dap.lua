@@ -27,7 +27,7 @@ return {
 			{
 				"microsoft/vscode-js-debug",
 				version = "1.x",
-				build = "npm i && npm run compile vsDebugServerBundle && mv dist out",
+				build = "npm install --legacy-peer-deps && npx gulp vsDebugServerBundle && mv dist out",
 			},
 		},
 		{

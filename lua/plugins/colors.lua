@@ -4,8 +4,6 @@ return {
 		config = function()
 			require("onedark").setup({
 				colors = {
-					black="#111416",
-					bg0 = "#111416",
 					bg1 = "#31353f",
 					bg2 = "#353b45",
 					bg3 = "#373b43",
@@ -30,6 +28,12 @@ return {
 					diff_delete = "#e06c75",
 					diff_change = "#61afef",
 					diff_text = "#EBCB8B",
+				},
+				transparent = true,
+				highlights  = {
+					["@tag"] = { fg = "$red"},
+					["@tag.delimiter"] = { fg="$light_grey" },
+					["@punctuation.special"] = { fg="$light_grey" }
 				},
 				style = "darker",
 			})
