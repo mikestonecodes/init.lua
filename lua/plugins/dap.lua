@@ -3,21 +3,6 @@ local desc = function(str)
 end
 local js_based_languages = { "typescript", "javascript", "typescriptreact", "javascriptreact" }
 
----@param config {args?:string[]|fun():string[]?}
-local function get_args(config)
-	local args = type(config.args) == "function" and (config.args() or {}) or config.args or {}
-	config = vim.deepcopy(config)
-
-	---@cast args string[]
-	config.args = function()
-		---@diagnostic disable-next-line: redundant-parameter
-		local new_args = vim.fn.input("Run with args: ", table.concat(args, " ")) --[[@as string]]
-		return vim.split(vim.fn.expand(new_args) --[[@as string]], " ")
-	end
-
-	return config
-end
-
 return {
 	"mfussenegger/nvim-dap",
 	dependencies = {
@@ -192,16 +177,13 @@ return {
 		{
 			"<leader>da",
 			function()
-				if vim.fn.filereadable(".vscode/launch.json") then
-					local dap_vscode = require("dap.ext.vscode")
-					dap_vscode.json_decode = require("overseer.json").decode
-					dap_vscode.load_launchjs(nil, {
-						["firefox"] = js_based_languages,
-						["pwa-node"] = js_based_languages,
-						["pwa-chrome"] = js_based_languages,
-					})
-				end
-				require("dap").continue({ before = get_args })
+				local dap = require("dap")
+			    local launch_json = vim.fn.json_decode(vim.fn.readfile(".vscode/launch.json"))
+				dap.run(launch_json.configurations[1],{new=true})
+				dap.run(launch_json.configurations[2],{new=true})
+				--require("dap").run(require("dap").configurations[vim.api.nvim_buf_get_option(0, "filetype")][1])
+				--require("dap").run(require("dap").configurations[vim.api.nvim_buf_get_option(0, "filetype")][2])
+				print("attached")
 			end,
 			desc = desc("Run with Args"),
 		},
@@ -211,23 +193,14 @@ return {
 			Stopped = { "󰁕 ", "DiagnosticSignWarn", "DapStoppedLine" },
 			Breakpoint = { " ", "DiagnosticSignInfo" },
 			BreakpointCondition = { " ", "DiagnosticSignHint" },
-			BreakpointRejected = { " ", "DiagnosticSignError" },
+			BreakpointRejected = { " ", "DiagnosticSignError" },
 			LogPoint = ".>",
 		}
 		require("dap-vscode-js").setup({
 			debugger_path = vim.fn.stdpath("data") .. "/lazy/vscode-js-debug",
-			adapters = {  'pwa-chrome' },
+			adapters = { "pwa-chrome" },
 		})
 
-		require("dap").adapters.firefox = {
-			type = "executable",
-			command = "node",
-			port = 9222,
-			args = {
-				require("mason-registry").get_package("firefox-debug-adapter"):get_install_path()
-					.. "/dist/adapter.bundle.js",
-			},
-		}
 		require("dap").adapters["pwa-node"] = {
 			type = "server",
 			host = "localhost",
@@ -252,9 +225,10 @@ return {
 				{ text = sign[1], texthl = sign[2] or "DiagnosticInfo", linehl = sign[3], numhl = sign[3] }
 			)
 		end
-
+		--require("dap").set_log_level("TRACE");
+		--require("dap").defaults.fallback.exception_breakpoints = { "uncaught" }
 		-- Use overseer for running preLaunchTask and postDebugTask.
-		require("overseer").patch_dap(true)
+		--require("overseer").patch_dap(true)
 
 		-- Lua configurations.
 	end,
